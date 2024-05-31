@@ -1,0 +1,12 @@
+[package]
+name = "rust_game_engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bytemuck = "1"
+ogl33 = { version = "0.2.0", features = ["debug_error_checks"] }
+beryllium = "0.13.3"
+ultraviolet = "0.9.2"
+image = "0.25.1"
+bitmask = "0.5.0"
