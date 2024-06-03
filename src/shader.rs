@@ -73,7 +73,7 @@ impl Shader {
 
     pub fn set_bool(&self, name: &str, value: bool) {
         unsafe {
-            glUniform1i(glGetUniformLocation(self.program_id, CString::new(name).unwrap().as_ptr().cast()), value.try_into().unwrap());
+            glUniform1i(glGetUniformLocation(self.program_id, CString::new(name).unwrap().as_ptr().cast()), value.into());
         }
     }
 
@@ -85,13 +85,13 @@ impl Shader {
 
     pub fn set_float(&self, name: &str, value: f32) {
         unsafe {
-            glUniform1f(glGetUniformLocation(self.program_id, CString::new(name).unwrap().as_ptr().cast()), value.try_into().unwrap());
+            glUniform1f(glGetUniformLocation(self.program_id, CString::new(name).unwrap().as_ptr().cast()), value);
         }
     }
 
     pub fn set_vec3(&self, name: &str, x: f32, y: f32, z: f32) {
         unsafe {
-            glUniform3f(glGetUniformLocation(self.program_id, CString::new(name).unwrap().as_ptr().cast()), x.try_into().unwrap(), y.try_into().unwrap(), z.try_into().unwrap());
+            glUniform3f(glGetUniformLocation(self.program_id, CString::new(name).unwrap().as_ptr().cast()), x, y, z);
         }
     }
 

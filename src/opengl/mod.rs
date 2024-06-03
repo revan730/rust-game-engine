@@ -1,10 +1,11 @@
 use beryllium::video::GlWindow;
 use bitmask::bitmask;
-use ogl33::{GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, GL_DEPTH_TEST, GL_LINES, GL_POINTS, GL_STENCIL_BUFFER_BIT, GL_TRIANGLES, glClear, glClearColor, glDrawArrays, glEnable, GLenum, GLint, GLsizei, load_gl_with};
+use ogl33::{GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, GL_DEPTH_TEST, GL_LINES, GL_POINTS, GL_STENCIL_BUFFER_BIT, GL_TRIANGLES, GL_UNSIGNED_BYTE, GL_UNSIGNED_INT, GL_UNSIGNED_SHORT, glClear, glClearColor, glDrawArrays, glDrawElements, glEnable, GLenum, GLint, GLsizei, load_gl_with};
 
 pub mod vertex_array_object;
 pub mod vertex_buffer_object;
 pub mod texture;
+pub mod element_buffer_object;
 
 bitmask! {
     pub mask ClearBitMask: u32 where flags ClearBitFlags {
@@ -25,6 +26,13 @@ pub enum Primitive {
 pub enum Capability {
     DepthTest = GL_DEPTH_TEST,
     // TODO: Add others
+}
+
+#[repr(u32)]
+pub enum ElementType {
+    UnsignedByte = GL_UNSIGNED_BYTE,
+    UnsignedShort = GL_UNSIGNED_SHORT,
+    UnsignedInt = GL_UNSIGNED_INT,
 }
 
 pub fn load_gl(gl_window: &GlWindow) {
@@ -54,5 +62,11 @@ pub fn clear(bit_mask: ClearBitMask) {
 pub fn draw_arrays(primitive: Primitive, start: usize, count: usize) {
     unsafe {
         glDrawArrays(primitive as GLenum, start as GLint, count as GLsizei);
+    }
+}
+
+pub fn draw_elements(primitive: Primitive, count: usize, element_type: ElementType) {
+    unsafe {
+        glDrawElements(primitive as GLenum, count as GLsizei, element_type as GLenum, std::ptr::null());
     }
 }

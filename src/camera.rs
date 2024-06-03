@@ -32,10 +32,10 @@ pub enum CameraMovement {
 impl Camera {
     pub fn from_vec3(position: Vec3, up: Vec3, yaw: f32, pitch: f32) -> Self {
         let mut camera = Self {
-            position: position,
+            position,
             world_up: up,
-            yaw: yaw,
-            pitch: pitch,
+            yaw,
+            pitch,
             front: Vec3::new(0.0, 0.0, -1.0),
             movement_speed: SPEED,
             mouse_sensitivity: SENSITIVITY,
@@ -98,10 +98,10 @@ impl Camera {
         self.front.z = self.yaw.to_radians().sin() * self.pitch.to_radians().cos();
         self.front.normalize();
 
-        self.right = Vec3::from(self.front).cross(self.world_up);
+        self.right = self.front.cross(self.world_up);
         self.right.normalize();
 
-        self.up = Vec3::from(self.right).cross(self.front);
+        self.up = self.right.cross(self.front);
         self.up.normalize();
     }
 }

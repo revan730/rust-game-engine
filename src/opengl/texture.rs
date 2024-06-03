@@ -55,6 +55,12 @@ impl Texture {
         }
     }
 
+    pub fn unbind() {
+        unsafe {
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+    }
+
     pub fn set_wrap(coordinate: WrapCoordinate, param: WrapParam) {
         unsafe {
             glTexParameteri(GL_TEXTURE_2D, coordinate as GLenum, param as GLint);
@@ -73,6 +79,7 @@ impl Texture {
         }
     }
 
+    // TODO: Handle reading from file
     pub fn load_from_image_buffer(image_buffer: DynamicImage, generate_mipmap: bool) {
         let color = image_buffer.color();
 

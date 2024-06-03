@@ -36,7 +36,7 @@ impl VertexArrayObject {
 
     pub fn set_vertex_attribute(index: usize, size: usize, attrib_type: VertexAttribType, normalized: bool, stride: usize, offset: usize) {
         unsafe {
-            glVertexAttribPointer(index as GLuint, size as GLint, attrib_type as GLenum, normalized.try_into().unwrap(), stride.try_into().unwrap(), offset as *const _);
+            glVertexAttribPointer(index as GLuint, size as GLint, attrib_type as GLenum, normalized.into(), stride.try_into().unwrap(), offset as *const _);
             glEnableVertexAttribArray(index as GLuint);
         }
     }
