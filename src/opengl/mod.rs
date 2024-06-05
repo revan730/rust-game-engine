@@ -1,6 +1,6 @@
 use beryllium::video::GlWindow;
 use bitmask::bitmask;
-use ogl33::{GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, GL_DEPTH_TEST, GL_LINES, GL_POINTS, GL_STENCIL_BUFFER_BIT, GL_TRIANGLES, GL_UNSIGNED_BYTE, GL_UNSIGNED_INT, GL_UNSIGNED_SHORT, glClear, glClearColor, glDrawArrays, glDrawElements, glEnable, GLenum, GLint, GLsizei, load_gl_with};
+use ogl33::{GL_BLEND, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, GL_DEPTH_TEST, GL_LINES, GL_ONE_MINUS_SRC_ALPHA, GL_POINTS, GL_SRC_ALPHA, GL_STENCIL_BUFFER_BIT, GL_TRIANGLES, GL_UNPACK_ALIGNMENT, GL_UNSIGNED_BYTE, GL_UNSIGNED_INT, GL_UNSIGNED_SHORT, glBlendFunc, glClear, glClearColor, glDrawArrays, glDrawElements, glEnable, GLenum, GLint, glPixelStorei, GLsizei, load_gl_with};
 
 pub mod vertex_array_object;
 pub mod vertex_buffer_object;
@@ -25,6 +25,7 @@ pub enum Primitive {
 #[repr(u32)]
 pub enum Capability {
     DepthTest = GL_DEPTH_TEST,
+    Blending = GL_BLEND,
     // TODO: Add others
 }
 
@@ -33,6 +34,20 @@ pub enum ElementType {
     UnsignedByte = GL_UNSIGNED_BYTE,
     UnsignedShort = GL_UNSIGNED_SHORT,
     UnsignedInt = GL_UNSIGNED_INT,
+}
+
+#[repr(u32)]
+pub enum BlendFactor {
+    SrcAlpha = GL_SRC_ALPHA,
+    OneMinusSrcAlpha = GL_ONE_MINUS_SRC_ALPHA,
+}
+
+#[repr(u32)]
+pub enum UnpackAlignment {
+    One = 1,
+    Two = 2,
+    Four = 4,
+    Eight = 8,
 }
 
 pub fn load_gl(gl_window: &GlWindow) {
@@ -68,5 +83,17 @@ pub fn draw_arrays(primitive: Primitive, start: usize, count: usize) {
 pub fn draw_elements(primitive: Primitive, count: usize, element_type: ElementType) {
     unsafe {
         glDrawElements(primitive as GLenum, count as GLsizei, element_type as GLenum, std::ptr::null());
+    }
+}
+
+pub fn blend_func(s_factor: BlendFactor, d_factor: BlendFactor) {
+    unsafe {
+        glBlendFunc(s_factor as GLenum, d_factor as GLenum);
+    }
+}
+
+pub fn pixel_store_unpack_alignment(alignment: UnpackAlignment) {
+    unsafe {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, alignment as GLint);
     }
 }

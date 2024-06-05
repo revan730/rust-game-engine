@@ -8,7 +8,7 @@ use ultraviolet::{Vec2, Vec3};
 
 use crate::graphics::mesh::Mesh;
 use crate::graphics::vertex::Vertex;
-use crate::opengl::texture::Texture;
+use crate::opengl::texture::{MagFilterParam, MinFilterParam, Texture, WrapCoordinate, WrapParam};
 use crate::shader::Shader;
 
 pub struct Model {
@@ -40,7 +40,14 @@ fn load_meshes_from_models(models: Vec<tobj::Model>, materials: Vec<Material>, p
 
         let texture = Texture::new().expect("Failed to allocate texture");
         texture.bind();
+
+        Texture::set_wrap(WrapCoordinate::S, WrapParam::Repeat);
+        Texture::set_wrap(WrapCoordinate::T, WrapParam::Repeat);
+        Texture::set_min_filter(MinFilterParam::Linear);
+        Texture::set_mag_filter(MagFilterParam::Linear);
+
         Texture::load_from_image_buffer(texture_image, true);
+
         Texture::unbind();
 
         let mesh = &model.mesh;

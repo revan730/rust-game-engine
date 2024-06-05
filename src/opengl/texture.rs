@@ -1,5 +1,7 @@
+use std::ptr::null;
+
 use image::{ColorType, DynamicImage};
-use ogl33::{GL_CLAMP_TO_BORDER, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_MIRRORED_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_R16, GL_R8, GL_RED, GL_REPEAT, GL_RG, GL_RG16, GL_RG8, GL_RGB, GL_RGB16, GL_RGB8, GL_RGBA, GL_RGBA16, GL_RGBA8, GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_TEXTURE_MIN_FILTER, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, glActiveTexture, glBindTexture, GLenum, glGenerateMipmap, glGenTextures, GLint, glTexImage2D, glTexParameteri, GLuint};
+use ogl33::{GL_CLAMP_TO_BORDER, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_MIRRORED_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_R16, GL_R8, GL_RED, GL_REPEAT, GL_RG, GL_RG16, GL_RG8, GL_RGB, GL_RGB16, GL_RGB8, GL_RGBA, GL_RGBA16, GL_RGBA8, GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_TEXTURE_MIN_FILTER, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, glActiveTexture, glBindTexture, GLenum, glGenerateMipmap, glGenTextures, GLint, glTexImage2D, glTexParameteri, glTexSubImage2D, GLuint};
 
 pub struct Texture(pub GLuint);
 
@@ -102,11 +104,23 @@ impl Texture {
         }
     }
 
+    pub fn load_empty(width: u32, height: u32) {
+        unsafe {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R8 as GLint, width.try_into().unwrap(), height.try_into().unwrap(), 0, GL_RED, GL_UNSIGNED_BYTE, null());
+        }
+    }
+
     pub fn set_active_texture(index: usize) {
         let gl_index = GL_TEXTURE0 + index as GLenum;
 
         unsafe {
             glActiveTexture(gl_index);
+        }
+    }
+
+    pub fn upload_pixels<T>(&self, x_offset: u32, y_offset: u32, width: u32, height: u32, data_ptr: *const T) {
+        unsafe {
+            glTexSubImage2D(GL_TEXTURE_2D, 0, x_offset.try_into().unwrap(), y_offset.try_into().unwrap(), width.try_into().unwrap(), height.try_into().unwrap(), GL_RED, GL_UNSIGNED_BYTE, data_ptr.cast())
         }
     }
 }

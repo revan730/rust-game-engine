@@ -6,7 +6,7 @@ pub const YAW: f32 = -90.0;
 pub const PITCH: f32 = 0.0;
 const SPEED: f32 = 20.5;
 const SENSITIVITY: f32 = 0.1;
-const ZOOM: f32 = 45.0;
+const ZOOM: f32 = 70.0;
 
 pub struct Camera {
     pub position: Vec3,
@@ -62,7 +62,7 @@ impl Camera {
             CameraMovement::Right => self.position += self.right * velocity,
         }
 
-        self.position.y = 0.0;
+        self.position.y = 1.6; // ????
     }
 
     pub fn process_mouse_movement(&mut self, x_offset: f32, y_offset: f32, constrain_pitch: bool) {
