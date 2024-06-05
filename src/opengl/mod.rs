@@ -1,6 +1,6 @@
 use beryllium::video::GlWindow;
 use bitmask::bitmask;
-use ogl33::{GL_BLEND, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, GL_DEPTH_TEST, GL_LINES, GL_ONE_MINUS_SRC_ALPHA, GL_POINTS, GL_SRC_ALPHA, GL_STENCIL_BUFFER_BIT, GL_TRIANGLES, GL_UNPACK_ALIGNMENT, GL_UNSIGNED_BYTE, GL_UNSIGNED_INT, GL_UNSIGNED_SHORT, glBlendFunc, glClear, glClearColor, glDrawArrays, glDrawElements, glEnable, GLenum, GLint, glPixelStorei, GLsizei, load_gl_with};
+use ogl33::{GL_BLEND, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, GL_DEPTH_TEST, GL_LEQUAL, GL_LESS, GL_LINES, GL_ONE_MINUS_SRC_ALPHA, GL_POINTS, GL_SRC_ALPHA, GL_STENCIL_BUFFER_BIT, GL_TRIANGLES, GL_UNPACK_ALIGNMENT, GL_UNSIGNED_BYTE, GL_UNSIGNED_INT, GL_UNSIGNED_SHORT, glBlendFunc, glClear, glClearColor, glDepthFunc, glDrawArrays, glDrawElements, glEnable, GLenum, GLint, glPixelStorei, GLsizei, load_gl_with};
 
 pub mod vertex_array_object;
 pub mod vertex_buffer_object;
@@ -50,6 +50,12 @@ pub enum UnpackAlignment {
     Eight = 8,
 }
 
+#[repr(u32)]
+pub enum DepthFunc {
+    LEqual = GL_LEQUAL,
+    Less = GL_LESS,
+}
+
 pub fn load_gl(gl_window: &GlWindow) {
     unsafe {
         load_gl_with(|f_name| gl_window.get_proc_address(f_name.cast()));
@@ -95,5 +101,11 @@ pub fn blend_func(s_factor: BlendFactor, d_factor: BlendFactor) {
 pub fn pixel_store_unpack_alignment(alignment: UnpackAlignment) {
     unsafe {
         glPixelStorei(GL_UNPACK_ALIGNMENT, alignment as GLint);
+    }
+}
+
+pub fn gl_depth_func(depth_func: DepthFunc) {
+    unsafe {
+        glDepthFunc(depth_func as GLenum);
     }
 }

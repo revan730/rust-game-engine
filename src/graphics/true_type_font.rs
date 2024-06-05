@@ -6,7 +6,7 @@ use ultraviolet::Mat4;
 
 use crate::opengl::draw_arrays;
 use crate::opengl::Primitive::Triangles;
-use crate::opengl::texture::{MagFilterParam, MinFilterParam, Texture, WrapCoordinate, WrapParam};
+use crate::opengl::texture::{MagFilterParam, MinFilterParam, Texture, TextureType, WrapCoordinate, WrapParam};
 use crate::opengl::vertex_array_object::VertexArrayObject;
 use crate::opengl::vertex_array_object::VertexAttribType::Float;
 use crate::opengl::vertex_buffer_object::VertexBufferObject;
@@ -74,15 +74,15 @@ impl TrueTypeFont<'_> {
             .build();
 
         let texture = Texture::new().expect("Failed to allocate texture for font");
-        texture.bind();
+        texture.bind(TextureType::Texture2d);
 
-        Texture::set_wrap(WrapCoordinate::S, WrapParam::ClampToEdge);
-        Texture::set_wrap(WrapCoordinate::T, WrapParam::ClampToEdge);
-        Texture::set_min_filter(MinFilterParam::Nearest);
-        Texture::set_mag_filter(MagFilterParam::Nearest);
+        Texture::set_wrap(TextureType::Texture2d, WrapCoordinate::S, WrapParam::ClampToEdge);
+        Texture::set_wrap(TextureType::Texture2d, WrapCoordinate::T, WrapParam::ClampToEdge);
+        Texture::set_min_filter(TextureType::Texture2d, MinFilterParam::Nearest);
+        Texture::set_mag_filter(TextureType::Texture2d, MagFilterParam::Nearest);
 
-        Texture::load_empty(1280, 720); // TODO: Harcoded, replace
-        Texture::unbind();
+        Texture::load_empty(TextureType::Texture2d, 1280, 720); // TODO: Harcoded, replace
+        Texture::unbind(TextureType::Texture2d);
 
         Self {
             font,
@@ -101,11 +101,11 @@ impl TrueTypeFont<'_> {
             self.cache.queue_glyph(0, glyph.clone());
         }
 
-        self.texture.bind();
+        self.texture.bind(TextureType::Texture2d);
         self.cache.cache_queued(|rect, data| {
-            self.texture.upload_pixels(rect.min.x, rect.min.y, rect.width(), rect.height(), data.as_ptr());
+            self.texture.upload_pixels(TextureType::Texture2d, rect.min.x, rect.min.y, rect.width(), rect.height(), data.as_ptr());
         }).unwrap();
-        Texture::unbind();
+        Texture::unbind(TextureType::Texture2d);
 
         #[derive(Copy, Clone)]
         #[repr(C)]
@@ -170,7 +170,7 @@ impl TrueTypeFont<'_> {
         shader_program.bind();
 
         Texture::set_active_texture(0);
-        self.texture.bind();
+        self.texture.bind(TextureType::Texture2d);
         shader_program.set_int("tex", 0);
         shader_program.set_mat4("translation", translation);
 

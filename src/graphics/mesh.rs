@@ -5,7 +5,7 @@ use crate::opengl::draw_elements;
 use crate::opengl::element_buffer_object::ElementBufferObject;
 use crate::opengl::ElementType::UnsignedInt;
 use crate::opengl::Primitive::Triangles;
-use crate::opengl::texture::Texture;
+use crate::opengl::texture::{Texture, TextureType};
 use crate::opengl::vertex_array_object::VertexArrayObject;
 use crate::opengl::vertex_array_object::VertexAttribType::Float;
 use crate::opengl::vertex_buffer_object::VertexBufferObject;
@@ -42,7 +42,7 @@ impl Mesh {
             // TODO: Handle different texture types
 
             shader.set_int(format!("texture{}", i + 1).to_owned().as_str(), i.try_into().unwrap());
-            texture.bind();
+            texture.bind(TextureType::Texture2d);
         }
 
         self.vao.bind();

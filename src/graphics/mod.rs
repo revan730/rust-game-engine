@@ -5,3 +5,4 @@ pub mod scene;
 pub mod static_body_3d;
 pub mod node_3d;
 pub mod true_type_font;
+pub mod skybox;

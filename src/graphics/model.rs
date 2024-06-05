@@ -8,7 +8,7 @@ use ultraviolet::{Vec2, Vec3};
 
 use crate::graphics::mesh::Mesh;
 use crate::graphics::vertex::Vertex;
-use crate::opengl::texture::{MagFilterParam, MinFilterParam, Texture, WrapCoordinate, WrapParam};
+use crate::opengl::texture::{MagFilterParam, MinFilterParam, Texture, TextureType, WrapCoordinate, WrapParam};
 use crate::shader::Shader;
 
 pub struct Model {
@@ -39,16 +39,16 @@ fn load_meshes_from_models(models: Vec<tobj::Model>, materials: Vec<Material>, p
         };
 
         let texture = Texture::new().expect("Failed to allocate texture");
-        texture.bind();
+        texture.bind(TextureType::Texture2d);
 
-        Texture::set_wrap(WrapCoordinate::S, WrapParam::Repeat);
-        Texture::set_wrap(WrapCoordinate::T, WrapParam::Repeat);
-        Texture::set_min_filter(MinFilterParam::Linear);
-        Texture::set_mag_filter(MagFilterParam::Linear);
+        Texture::set_wrap(TextureType::Texture2d, WrapCoordinate::S, WrapParam::Repeat);
+        Texture::set_wrap(TextureType::Texture2d, WrapCoordinate::T, WrapParam::Repeat);
+        Texture::set_min_filter(TextureType::Texture2d, MinFilterParam::Linear);
+        Texture::set_mag_filter(TextureType::Texture2d, MagFilterParam::Linear);
 
-        Texture::load_from_image_buffer(texture_image, true);
+        Texture::load_from_image_buffer(TextureType::Texture2d, texture_image, true);
 
-        Texture::unbind();
+        Texture::unbind(TextureType::Texture2d);
 
         let mesh = &model.mesh;
         let num_vertices = mesh.positions.len() / 3;

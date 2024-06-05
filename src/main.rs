@@ -14,6 +14,7 @@ use crate::camera::CameraMovement;
 use crate::graphics::model::Model;
 use crate::graphics::node_3d::Node3D;
 use crate::graphics::scene::Scene;
+use crate::graphics::skybox::Skybox;
 use crate::graphics::static_body_3d::StaticBody3D;
 use crate::graphics::true_type_font::TrueTypeFont;
 use crate::math::rotation::Rotation;
@@ -114,11 +115,13 @@ fn main() {
     shader_program_font.bind();
     shader_program_font.set_int("tex", 0);
 
-    let shader_program = Shader::from_files("src/6.3.shader.vs", "src/6.3.shader.fs");
+    let shader_program = Shader::from_files("res/shaders/default.vs", "res/shaders/default.fs");
 
     shader_program.bind();
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
+
+    let shader_program_skybox = Shader::from_files("res/shaders/skybox.vs", "res/shaders/skybox.fs");
 
 
     let mut last_time = 0.0;
@@ -137,7 +140,9 @@ fn main() {
     let landscape_rotation = Rotation { angle_x: 0.0, angle_y: 0.0, angle_z: 0.0 };
     static_bodies.push(StaticBody3D { node3d: Node3D { world_position: Vec3::new(0.0, 0.0, 0.0), scale: Vec3::new(5.0, 5.0, 5.0), rotation: landscape_rotation }, model: landscape_model.clone() });
 
-    let scene = Scene::new(static_bodies);
+    let mut skybox = Skybox::new_from_image_paths(shader_program_skybox, ["res/models/textures/skybox/right.jpg", "res/models/textures/skybox/left.jpg", "res/models/textures/skybox/top.jpg", "res/models/textures/skybox/bottom.jpg", "res/models/textures/skybox/front.jpg", "res/models/textures/skybox/back.jpg"]); // TODO: Should be a part of the scene
+
+    let scene = Scene::new(static_bodies, Some(skybox));
     let mut font = TrueTypeFont::load_from_file("res/fonts/futura.ttf");
 
     'main_loop: loop {
@@ -181,7 +186,7 @@ fn main() {
         let text_translation = Mat4::from_translation(Vec3::new(0.1, -1.5, 0.0));
         // TODO: It needs orthogonal projection so that actual screen pixel positions can be used
 
-        scene.draw(&shader_program);
+        scene.draw(&shader_program, view, projection);
         font.draw(&shader_program_font, format!("X: {} Y: {} Z: {}", camera.position.x, camera.position.y, camera.position.z).as_str(), 32.0, text_translation);
 
         win.swap_window();
