@@ -30,25 +30,17 @@ fn load_meshes_from_models(models: Vec<tobj::Model>, materials: Vec<Material>, p
         let mut material_path = path_root.to_path_buf();
         material_path.push(material.diffuse_texture.expect("Missing diffuse texture"));
 
-        let texture_image = {
-            let mut f = std::fs::File::open(material_path).unwrap();
-            let mut bytes = vec![];
-            std::io::Read::read_to_end(&mut f, &mut bytes).unwrap();
+        let texture = Texture::new(TextureType::Texture2d).expect("Failed to allocate texture");
+        texture.bind();
 
-            image::load_from_memory(&bytes).unwrap()
-        };
+        texture.set_wrap(WrapCoordinate::S, WrapParam::Repeat);
+        texture.set_wrap(WrapCoordinate::T, WrapParam::Repeat);
+        texture.set_min_filter(MinFilterParam::Linear);
+        texture.set_mag_filter(MagFilterParam::Linear);
 
-        let texture = Texture::new().expect("Failed to allocate texture");
-        texture.bind(TextureType::Texture2d);
+        texture.load_from_image_path(material_path.to_str().unwrap(), true);
 
-        Texture::set_wrap(TextureType::Texture2d, WrapCoordinate::S, WrapParam::Repeat);
-        Texture::set_wrap(TextureType::Texture2d, WrapCoordinate::T, WrapParam::Repeat);
-        Texture::set_min_filter(TextureType::Texture2d, MinFilterParam::Linear);
-        Texture::set_mag_filter(TextureType::Texture2d, MagFilterParam::Linear);
-
-        Texture::load_from_image_buffer(TextureType::Texture2d, texture_image, true);
-
-        Texture::unbind(TextureType::Texture2d);
+        texture.unbind();
 
         let mesh = &model.mesh;
         let num_vertices = mesh.positions.len() / 3;

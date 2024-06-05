@@ -73,16 +73,16 @@ impl TrueTypeFont<'_> {
             .dimensions(cache_width, cache_height)
             .build();
 
-        let texture = Texture::new().expect("Failed to allocate texture for font");
-        texture.bind(TextureType::Texture2d);
+        let texture = Texture::new(TextureType::Texture2d).expect("Failed to allocate texture for font");
+        texture.bind();
 
-        Texture::set_wrap(TextureType::Texture2d, WrapCoordinate::S, WrapParam::ClampToEdge);
-        Texture::set_wrap(TextureType::Texture2d, WrapCoordinate::T, WrapParam::ClampToEdge);
-        Texture::set_min_filter(TextureType::Texture2d, MinFilterParam::Nearest);
-        Texture::set_mag_filter(TextureType::Texture2d, MagFilterParam::Nearest);
+        texture.set_wrap(WrapCoordinate::S, WrapParam::ClampToEdge);
+        texture.set_wrap(WrapCoordinate::T, WrapParam::ClampToEdge);
+        texture.set_min_filter(MinFilterParam::Nearest);
+        texture.set_mag_filter(MagFilterParam::Nearest);
 
-        Texture::load_empty(TextureType::Texture2d, 1280, 720); // TODO: Harcoded, replace
-        Texture::unbind(TextureType::Texture2d);
+        texture.load_empty(1280, 720); // TODO: Harcoded, replace
+        texture.unbind();
 
         Self {
             font,
@@ -101,11 +101,11 @@ impl TrueTypeFont<'_> {
             self.cache.queue_glyph(0, glyph.clone());
         }
 
-        self.texture.bind(TextureType::Texture2d);
+        self.texture.bind();
         self.cache.cache_queued(|rect, data| {
-            self.texture.upload_pixels(TextureType::Texture2d, rect.min.x, rect.min.y, rect.width(), rect.height(), data.as_ptr());
+            self.texture.upload_pixels(rect.min.x, rect.min.y, rect.width(), rect.height(), data.as_ptr());
         }).unwrap();
-        Texture::unbind(TextureType::Texture2d);
+        self.texture.unbind();
 
         #[derive(Copy, Clone)]
         #[repr(C)]
@@ -170,7 +170,7 @@ impl TrueTypeFont<'_> {
         shader_program.bind();
 
         Texture::set_active_texture(0);
-        self.texture.bind(TextureType::Texture2d);
+        self.texture.bind();
         shader_program.set_int("tex", 0);
         shader_program.set_mat4("translation", translation);
 

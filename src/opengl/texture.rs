@@ -3,7 +3,10 @@ use std::ptr::null;
 use image::{ColorType, DynamicImage};
 use ogl33::{GL_CLAMP_TO_BORDER, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_MIRRORED_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_R16, GL_R8, GL_RED, GL_REPEAT, GL_RG, GL_RG16, GL_RG8, GL_RGB, GL_RGB16, GL_RGB8, GL_RGBA, GL_RGBA16, GL_RGBA8, GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_MAG_FILTER, GL_TEXTURE_MIN_FILTER, GL_TEXTURE_WRAP_R, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, glActiveTexture, glBindTexture, GLenum, glGenerateMipmap, glGenTextures, GLint, glTexImage2D, glTexParameteri, glTexSubImage2D, GLuint};
 
-pub struct Texture(pub GLuint);
+pub struct Texture {
+    id: GLuint,
+    texture_type: GLenum,
+}
 
 #[repr(u32)]
 #[derive(Clone, Copy)]
@@ -77,7 +80,7 @@ fn get_gl_image_params_from_color(color: ColorType) -> (GLenum, GLenum, GLenum) 
 }
 
 impl Texture {
-    pub fn new() -> Option<Self> {
+    pub fn new(texture_type: TextureType) -> Option<Self> {
         let mut texture = 0;
 
         unsafe {
@@ -87,49 +90,58 @@ impl Texture {
         if texture == 0 {
             None
         } else {
-            Some(Self(texture))
+            Some(Self {
+                id: texture,
+                texture_type: texture_type as GLenum,
+            })
         }
     }
 
-    pub fn bind(&self, texture_type: TextureType) {
+    pub fn bind(&self) {
         unsafe {
-            glBindTexture(texture_type as GLenum, self.0);
+            glBindTexture(self.texture_type, self.id);
         }
     }
 
-    pub fn unbind(texture_type: TextureType) {
+    pub fn unbind(&self) {
         unsafe {
-            glBindTexture(texture_type as GLenum, 0);
+            glBindTexture(self.texture_type, 0);
         }
     }
 
-    pub fn set_wrap(texture_type: TextureType, coordinate: WrapCoordinate, param: WrapParam) {
+    pub fn set_wrap(&self, coordinate: WrapCoordinate, param: WrapParam) {
         unsafe {
-            glTexParameteri(texture_type as GLenum, coordinate as GLenum, param as GLint);
+            glTexParameteri(self.texture_type, coordinate as GLenum, param as GLint);
         }
     }
 
-    pub fn set_min_filter(texture_type: TextureType, param: MinFilterParam) {
+    pub fn set_min_filter(&self, param: MinFilterParam) {
         unsafe {
-            glTexParameteri(texture_type as GLenum, GL_TEXTURE_MIN_FILTER, param as GLint);
+            glTexParameteri(self.texture_type, GL_TEXTURE_MIN_FILTER, param as GLint);
         }
     }
 
-    pub fn set_mag_filter(texture_type: TextureType, param: MagFilterParam) {
+    pub fn set_mag_filter(&self, param: MagFilterParam) {
         unsafe {
-            glTexParameteri(texture_type as GLenum, GL_TEXTURE_MAG_FILTER, param as GLint);
+            glTexParameteri(self.texture_type, GL_TEXTURE_MAG_FILTER, param as GLint);
         }
     }
 
-    // TODO: Handle reading from file
-    pub fn load_from_image_buffer(texture_type: TextureType, image_buffer: DynamicImage, generate_mipmap: bool) {
+    pub fn load_from_image_path(&self, image_path: &str, generate_mipmap: bool) {
+        let image_buffer = {
+            let mut f = std::fs::File::open(image_path).unwrap();
+            let mut bytes = vec![];
+            std::io::Read::read_to_end(&mut f, &mut bytes).unwrap();
+
+            image::load_from_memory(&bytes).unwrap()
+        };
         let color = image_buffer.color();
 
         let (internal_format, pixel_format, data_type) = get_gl_image_params_from_color(color);
         unsafe {
-            glTexImage2D(texture_type as GLenum, 0, internal_format as GLint, image_buffer.width().try_into().unwrap(), image_buffer.height().try_into().unwrap(), 0, pixel_format, data_type, image_buffer.as_bytes().as_ptr().cast());
+            glTexImage2D(self.texture_type, 0, internal_format as GLint, image_buffer.width().try_into().unwrap(), image_buffer.height().try_into().unwrap(), 0, pixel_format, data_type, image_buffer.as_bytes().as_ptr().cast());
             if generate_mipmap {
-                glGenerateMipmap(texture_type as GLenum);
+                glGenerateMipmap(self.texture_type);
             }
         }
     }
@@ -145,9 +157,9 @@ impl Texture {
         }
     }
 
-    pub fn load_empty(texture_type: TextureType, width: u32, height: u32) {
+    pub fn load_empty(&self, width: u32, height: u32) {
         unsafe {
-            glTexImage2D(texture_type as GLenum, 0, GL_R8 as GLint, width.try_into().unwrap(), height.try_into().unwrap(), 0, GL_RED, GL_UNSIGNED_BYTE, null());
+            glTexImage2D(self.texture_type, 0, GL_R8 as GLint, width.try_into().unwrap(), height.try_into().unwrap(), 0, GL_RED, GL_UNSIGNED_BYTE, null());
         }
     }
 
@@ -159,9 +171,9 @@ impl Texture {
         }
     }
 
-    pub fn upload_pixels<T>(&self, texture_type: TextureType, x_offset: u32, y_offset: u32, width: u32, height: u32, data_ptr: *const T) {
+    pub fn upload_pixels<T>(&self, x_offset: u32, y_offset: u32, width: u32, height: u32, data_ptr: *const T) {
         unsafe {
-            glTexSubImage2D(texture_type as GLenum, 0, x_offset.try_into().unwrap(), y_offset.try_into().unwrap(), width.try_into().unwrap(), height.try_into().unwrap(), GL_RED, GL_UNSIGNED_BYTE, data_ptr.cast())
+            glTexSubImage2D(self.texture_type, 0, x_offset.try_into().unwrap(), y_offset.try_into().unwrap(), width.try_into().unwrap(), height.try_into().unwrap(), GL_RED, GL_UNSIGNED_BYTE, data_ptr.cast())
         }
     }
 }

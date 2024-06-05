@@ -66,15 +66,15 @@ pub struct Skybox {
 
 impl Skybox {
     pub fn new_from_image_paths(shader_program: Shader, paths: [&str; 6]) -> Self {
-        let texture = Texture::new().expect("Failed to allocate texture for skybox");
-        texture.bind(TextureType::CubeMap);
+        let texture = Texture::new(TextureType::CubeMap).expect("Failed to allocate texture for skybox");
+        texture.bind();
         Texture::load_cube_map_from_paths(paths);
 
-        Texture::set_min_filter(TextureType::CubeMap, MinFilterParam::Linear);
-        Texture::set_mag_filter(TextureType::CubeMap, MagFilterParam::Linear);
-        Texture::set_wrap(TextureType::CubeMap, WrapCoordinate::S, WrapParam::ClampToEdge);
-        Texture::set_wrap(TextureType::CubeMap, WrapCoordinate::T, WrapParam::ClampToEdge);
-        Texture::set_wrap(TextureType::CubeMap, WrapCoordinate::R, WrapParam::ClampToEdge);
+        texture.set_min_filter(MinFilterParam::Linear);
+        texture.set_mag_filter(MagFilterParam::Linear);
+        texture.set_wrap(WrapCoordinate::S, WrapParam::ClampToEdge);
+        texture.set_wrap(WrapCoordinate::T, WrapParam::ClampToEdge);
+        texture.set_wrap(WrapCoordinate::R, WrapParam::ClampToEdge);
 
         let vao = VertexArrayObject::new().expect("Failed to allocate vertex array object for skybox");
         let vbo = VertexBufferObject::new().expect("Failed to allocate vertex buffer object for skybox");
@@ -109,7 +109,7 @@ impl Skybox {
 
         self.vao.bind();
         Texture::set_active_texture(0);
-        self.texture.bind(TextureType::CubeMap);
+        self.texture.bind();
         opengl::draw_arrays(Primitive::Triangles, 0, SKYBOX_VERTICES.len());
         VertexArrayObject::unbind();
         gl_depth_func(DepthFunc::Less);

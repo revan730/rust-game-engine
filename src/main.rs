@@ -140,7 +140,7 @@ fn main() {
     let landscape_rotation = Rotation { angle_x: 0.0, angle_y: 0.0, angle_z: 0.0 };
     static_bodies.push(StaticBody3D { node3d: Node3D { world_position: Vec3::new(0.0, 0.0, 0.0), scale: Vec3::new(5.0, 5.0, 5.0), rotation: landscape_rotation }, model: landscape_model.clone() });
 
-    let mut skybox = Skybox::new_from_image_paths(shader_program_skybox, ["res/models/textures/skybox/right.jpg", "res/models/textures/skybox/left.jpg", "res/models/textures/skybox/top.jpg", "res/models/textures/skybox/bottom.jpg", "res/models/textures/skybox/front.jpg", "res/models/textures/skybox/back.jpg"]); // TODO: Should be a part of the scene
+    let skybox = Skybox::new_from_image_paths(shader_program_skybox, ["res/models/textures/skybox/right.jpg", "res/models/textures/skybox/left.jpg", "res/models/textures/skybox/top.jpg", "res/models/textures/skybox/bottom.jpg", "res/models/textures/skybox/front.jpg", "res/models/textures/skybox/back.jpg"]);
 
     let scene = Scene::new(static_bodies, Some(skybox));
     let mut font = TrueTypeFont::load_from_file("res/fonts/futura.ttf");
