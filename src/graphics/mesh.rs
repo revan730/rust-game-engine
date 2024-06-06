@@ -8,7 +8,7 @@ use crate::opengl::Primitive::Triangles;
 use crate::opengl::texture::Texture;
 use crate::opengl::vertex_array_object::VertexArrayObject;
 use crate::opengl::vertex_array_object::VertexAttribType::Float;
-use crate::opengl::vertex_buffer_object::VertexBufferObject;
+use crate::opengl::vertex_buffer_object::{BufferUsage, VertexBufferObject};
 use crate::shader::Shader;
 
 pub struct Mesh {
@@ -57,7 +57,7 @@ impl Mesh {
         self.vao.bind();
         self.vbo.bind();
 
-        VertexBufferObject::load_data(self.vertices.len() * size_of::<Vertex>(), self.vertices.as_ptr());
+        VertexBufferObject::load_data(self.vertices.len() * size_of::<Vertex>(), self.vertices.as_ptr(), BufferUsage::StaticDraw);
         self.ebo.bind();
         ElementBufferObject::load_data(self.indices.len() * size_of::<u32>(), self.indices.as_ptr());
 

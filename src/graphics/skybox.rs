@@ -7,7 +7,7 @@ use crate::opengl::{DepthFunc, gl_depth_func, Primitive};
 use crate::opengl::texture::{MagFilterParam, MinFilterParam, Texture, TextureType, WrapCoordinate, WrapParam};
 use crate::opengl::vertex_array_object::VertexArrayObject;
 use crate::opengl::vertex_array_object::VertexAttribType::Float;
-use crate::opengl::vertex_buffer_object::VertexBufferObject;
+use crate::opengl::vertex_buffer_object::{BufferUsage, VertexBufferObject};
 use crate::shader::Shader;
 
 type SkyboxVertex = [f32; 3];
@@ -81,7 +81,7 @@ impl Skybox {
         vao.bind();
         vbo.bind();
 
-        VertexBufferObject::load_data(SKYBOX_VERTICES.len() * size_of::<SkyboxVertex>(), SKYBOX_VERTICES.as_ptr());
+        VertexBufferObject::load_data(SKYBOX_VERTICES.len() * size_of::<SkyboxVertex>(), SKYBOX_VERTICES.as_ptr(), BufferUsage::StaticDraw);
 
         VertexArrayObject::set_vertex_attribute(0, 3, Float, false, size_of::<SkyboxVertex>(), 0);
 

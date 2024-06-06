@@ -1,6 +1,12 @@
-use ogl33::{GL_ARRAY_BUFFER, GL_STATIC_DRAW, glBindBuffer, glBufferData, glGenBuffers, GLuint};
+use ogl33::{GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, GL_STATIC_DRAW, glBindBuffer, glBufferData, GLenum, glGenBuffers, GLuint};
 
 pub struct VertexBufferObject(pub GLuint);
+
+#[repr(u32)]
+pub enum BufferUsage {
+    StaticDraw = GL_STATIC_DRAW,
+    DynamicDraw = GL_DYNAMIC_DRAW,
+}
 
 impl VertexBufferObject {
     pub fn new() -> Option<Self> {
@@ -29,9 +35,9 @@ impl VertexBufferObject {
         }
     }
 
-    pub fn load_data<T>(size: usize, data_ptr: *const T) {
+    pub fn load_data<T>(size: usize, data_ptr: *const T, usage: BufferUsage) {
         unsafe {
-            glBufferData(GL_ARRAY_BUFFER, size.try_into().unwrap(), data_ptr.cast(), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, size.try_into().unwrap(), data_ptr.cast(), usage as GLenum);
         }
     }
 }

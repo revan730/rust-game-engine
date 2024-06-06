@@ -9,10 +9,20 @@ use crate::opengl::Primitive::Triangles;
 use crate::opengl::texture::{MagFilterParam, MinFilterParam, Texture, TextureType, WrapCoordinate, WrapParam};
 use crate::opengl::vertex_array_object::VertexArrayObject;
 use crate::opengl::vertex_array_object::VertexAttribType::Float;
-use crate::opengl::vertex_buffer_object::VertexBufferObject;
+use crate::opengl::vertex_buffer_object::{BufferUsage, VertexBufferObject};
 use crate::shader::Shader;
 
+#[derive(Copy, Clone)]
+#[repr(C)]
+struct Vertex {
+    position: [f32; 2],
+    tex_coords: [f32; 2],
+    colour: [f32; 4],
+}
+
 pub struct TrueTypeFont<'a> {
+    vao: VertexArrayObject,
+    vbo: VertexBufferObject,
     font: Font<'a>,
     cache: Cache<'a>,
     texture: Texture,
@@ -82,15 +92,26 @@ impl TrueTypeFont<'_> {
 
         texture.load_empty(1280, 720); // TODO: Harcoded, replace
 
+        let vao = VertexArrayObject::new().expect("Failed to allocate vertex array object for font");
+        vao.bind();
+
+        let vbo = VertexBufferObject::new().expect("Failed to allocate vertex buffer for font");
+        vbo.bind();
+
+        VertexArrayObject::set_vertex_attribute(0, 4, Float, false, size_of::<Vertex>(), 0);
+        VertexArrayObject::set_vertex_attribute(1, 4, Float, false, size_of::<Vertex>(), size_of::<[f32; 4]>());
+
         Self {
             font,
             cache,
             texture,
+            vao,
+            vbo,
         }
     }
 
     pub fn draw(&mut self, shader_program: &Shader, text: &str, font_size: f32, translation: Mat4) {
-        // TODO: It's not optimal to repeat this whole process when the text is the same as it was in the last call
+        // TODO: It's not optimal to repeat this whole process when the text is the same as it was in the last call (should not be done at font level but rather on GUI widget level - same font can be used to draw lots of different strings)
         // TODO: Also, it's not optimal to reallocate VAO/VBO and set VAO attributes again as they will basically never change and new vertex data can be reloaded into existing buffer
 
         let scale = Scale::uniform(font_size);
@@ -105,14 +126,6 @@ impl TrueTypeFont<'_> {
         self.cache.cache_queued(|rect, data| {
             self.texture.upload_pixels(rect.min.x, rect.min.y, rect.width(), rect.height(), data.as_ptr());
         }).unwrap();
-
-        #[derive(Copy, Clone)]
-        #[repr(C)]
-        struct Vertex {
-            position: [f32; 2],
-            tex_coords: [f32; 2],
-            colour: [f32; 4],
-        }
 
         let colour = [1.0, 1.0, 1.0, 1.0];
         let origin = point(0.0, 0.0);
@@ -173,19 +186,12 @@ impl TrueTypeFont<'_> {
         shader_program.set_int("tex", 0);
         shader_program.set_mat4("translation", translation);
 
-        let vao = VertexArrayObject::new().expect("Failed to allocate vertex array object for font");
-        vao.bind();
+        self.vao.bind();
 
-        let vertex_buffer = VertexBufferObject::new().expect("Failed to allocate vertex buffer for font");
-        vertex_buffer.bind();
-
-        VertexBufferObject::load_data(vertices.len() * size_of::<Vertex>(), vertices.as_ptr());
-
-        VertexArrayObject::set_vertex_attribute(0, 4, Float, false, size_of::<Vertex>(), 0);
-        VertexArrayObject::set_vertex_attribute(1, 4, Float, false, size_of::<Vertex>(), size_of::<[f32; 4]>());
+        VertexBufferObject::load_data(vertices.len() * size_of::<Vertex>(), vertices.as_ptr(), BufferUsage::DynamicDraw);
 
 
         draw_arrays(Triangles, 0, vertices.len());
-        VertexBufferObject::unbind();
+        VertexArrayObject::unbind();
     }
 }
