@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::rc::Rc;
 
 use beryllium::*;
-use beryllium::events::{SDLK_a, SDLK_d, SDLK_ESCAPE, SDLK_s, SDLK_w};
+use beryllium::events::{SDLK_a, SDLK_d, SDLK_ESCAPE, SDLK_LCTRL, SDLK_s, SDLK_SPACE, SDLK_w};
 use beryllium::events::SDL_Keycode;
 use beryllium::video::GlSwapInterval::Vsync;
 use ogl33::glViewport;
@@ -66,6 +66,14 @@ fn process_input(pressed_keys: &HashSet<SDL_Keycode>, camera: &mut Camera, dt: f
 
     if pressed_keys.contains(&SDLK_d) {
         camera.process_keyboard(CameraMovement::Right, dt);
+    }
+
+    if pressed_keys.contains(&SDLK_SPACE) {
+        camera.process_keyboard(CameraMovement::Up, dt);
+    }
+
+    if pressed_keys.contains(&SDLK_LCTRL) {
+        camera.process_keyboard(CameraMovement::Down, dt);
     }
 }
 

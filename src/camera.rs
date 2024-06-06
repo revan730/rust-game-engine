@@ -19,6 +19,7 @@ pub struct Camera {
     pub movement_speed: f32,
     pub mouse_sensitivity: f32,
     pub zoom: f32,
+    pub height: f32,
 }
 
 #[derive(Debug)]
@@ -27,6 +28,8 @@ pub enum CameraMovement {
     Backward,
     Left,
     Right,
+    Up,
+    Down,
 }
 
 impl Camera {
@@ -42,6 +45,7 @@ impl Camera {
             zoom: ZOOM,
             up: Vec3::new(0.0, 0.0, 0.0),
             right: Vec3::new(0.0, 0.0, 0.0),
+            height: position.y,
         };
         camera.update_camera_vectors();
 
@@ -60,9 +64,11 @@ impl Camera {
             CameraMovement::Backward => self.position -= self.front * velocity,
             CameraMovement::Left => self.position -= self.right * velocity,
             CameraMovement::Right => self.position += self.right * velocity,
+            CameraMovement::Up => self.height += velocity,
+            CameraMovement::Down => self.height -= velocity,
         }
 
-        self.position.y = 1.6; // ????
+        self.position.y = self.height; // Keeps camera from flying so that the y position can only be changed with up/down movement keys
     }
 
     pub fn process_mouse_movement(&mut self, x_offset: f32, y_offset: f32, constrain_pitch: bool) {

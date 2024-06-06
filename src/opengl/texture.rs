@@ -51,11 +51,6 @@ pub enum MagFilterParam {
     Linear = GL_LINEAR,
 }
 
-// TODO: I don't like this API implementation
-// I want texture to store it's type so i don't have to provide it for each operation
-// I want methods to be self-contained, for example, so i don't have to remember to bind texture before setting it's parameter, parameter setter should make sure it's set
-// Current implementation is too OpenGLy-state machine like
-
 fn load_image_file(path: &str) -> DynamicImage {
     let mut f = std::fs::File::open(path).unwrap();
     let mut bytes = vec![];
@@ -110,24 +105,32 @@ impl Texture {
     }
 
     pub fn set_wrap(&self, coordinate: WrapCoordinate, param: WrapParam) {
+        self.bind();
+
         unsafe {
             glTexParameteri(self.texture_type, coordinate as GLenum, param as GLint);
         }
     }
 
     pub fn set_min_filter(&self, param: MinFilterParam) {
+        self.bind();
+
         unsafe {
             glTexParameteri(self.texture_type, GL_TEXTURE_MIN_FILTER, param as GLint);
         }
     }
 
     pub fn set_mag_filter(&self, param: MagFilterParam) {
+        self.bind();
+
         unsafe {
             glTexParameteri(self.texture_type, GL_TEXTURE_MAG_FILTER, param as GLint);
         }
     }
 
     pub fn load_from_image_path(&self, image_path: &str, generate_mipmap: bool) {
+        self.bind();
+
         let image_buffer = {
             let mut f = std::fs::File::open(image_path).unwrap();
             let mut bytes = vec![];
@@ -158,6 +161,8 @@ impl Texture {
     }
 
     pub fn load_empty(&self, width: u32, height: u32) {
+        self.bind();
+
         unsafe {
             glTexImage2D(self.texture_type, 0, GL_R8 as GLint, width.try_into().unwrap(), height.try_into().unwrap(), 0, GL_RED, GL_UNSIGNED_BYTE, null());
         }
@@ -172,6 +177,8 @@ impl Texture {
     }
 
     pub fn upload_pixels<T>(&self, x_offset: u32, y_offset: u32, width: u32, height: u32, data_ptr: *const T) {
+        self.bind();
+
         unsafe {
             glTexSubImage2D(self.texture_type, 0, x_offset.try_into().unwrap(), y_offset.try_into().unwrap(), width.try_into().unwrap(), height.try_into().unwrap(), GL_RED, GL_UNSIGNED_BYTE, data_ptr.cast())
         }

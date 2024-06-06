@@ -74,7 +74,6 @@ impl TrueTypeFont<'_> {
             .build();
 
         let texture = Texture::new(TextureType::Texture2d).expect("Failed to allocate texture for font");
-        texture.bind();
 
         texture.set_wrap(WrapCoordinate::S, WrapParam::ClampToEdge);
         texture.set_wrap(WrapCoordinate::T, WrapParam::ClampToEdge);
@@ -82,7 +81,6 @@ impl TrueTypeFont<'_> {
         texture.set_mag_filter(MagFilterParam::Nearest);
 
         texture.load_empty(1280, 720); // TODO: Harcoded, replace
-        texture.unbind();
 
         Self {
             font,
@@ -92,6 +90,9 @@ impl TrueTypeFont<'_> {
     }
 
     pub fn draw(&mut self, shader_program: &Shader, text: &str, font_size: f32, translation: Mat4) {
+        // TODO: It's not optimal to repeat this whole process when the text is the same as it was in the last call
+        // TODO: Also, it's not optimal to reallocate VAO/VBO and set VAO attributes again as they will basically never change and new vertex data can be reloaded into existing buffer
+
         let scale = Scale::uniform(font_size);
         let (screen_width, screen_height) = (1280.0, 720.0); // TODO: Hardcoded, fix
 
@@ -101,11 +102,9 @@ impl TrueTypeFont<'_> {
             self.cache.queue_glyph(0, glyph.clone());
         }
 
-        self.texture.bind();
         self.cache.cache_queued(|rect, data| {
             self.texture.upload_pixels(rect.min.x, rect.min.y, rect.width(), rect.height(), data.as_ptr());
         }).unwrap();
-        self.texture.unbind();
 
         #[derive(Copy, Clone)]
         #[repr(C)]

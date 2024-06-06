@@ -12,9 +12,6 @@ pub struct Scene {
     // TODO: particles
 }
 
-// TODO: StaticBody3D. It will have a model, and Node3D
-// TODO: Node3D. It will have a transform, rotation and translation in scene (world) space
-
 impl Scene {
     pub fn new(static_bodies: Vec<StaticBody3D>, skybox: Option<Skybox>) -> Self {
         Self {

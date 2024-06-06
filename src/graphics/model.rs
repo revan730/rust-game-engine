@@ -31,7 +31,6 @@ fn load_meshes_from_models(models: Vec<tobj::Model>, materials: Vec<Material>, p
         material_path.push(material.diffuse_texture.expect("Missing diffuse texture"));
 
         let texture = Texture::new(TextureType::Texture2d).expect("Failed to allocate texture");
-        texture.bind();
 
         texture.set_wrap(WrapCoordinate::S, WrapParam::Repeat);
         texture.set_wrap(WrapCoordinate::T, WrapParam::Repeat);
@@ -40,7 +39,6 @@ fn load_meshes_from_models(models: Vec<tobj::Model>, materials: Vec<Material>, p
 
         texture.load_from_image_path(material_path.to_str().unwrap(), true);
 
-        texture.unbind();
 
         let mesh = &model.mesh;
         let num_vertices = mesh.positions.len() / 3;
