@@ -4,7 +4,6 @@ use ultraviolet::{Mat4, Vec3};
 
 pub const YAW: f32 = -90.0;
 pub const PITCH: f32 = 0.0;
-const SPEED: f32 = 20.5;
 const SENSITIVITY: f32 = 0.1;
 const ZOOM: f32 = 70.0;
 
@@ -16,21 +15,11 @@ pub struct Camera {
     pub world_up: Vec3,
     pub yaw: f32,
     pub pitch: f32,
-    pub movement_speed: f32,
     pub mouse_sensitivity: f32,
     pub zoom: f32,
     pub height: f32,
 }
 
-#[derive(Debug)]
-pub enum CameraMovement {
-    Forward,
-    Backward,
-    Left,
-    Right,
-    Up,
-    Down,
-}
 
 impl Camera {
     pub fn from_vec3(position: Vec3, up: Vec3, yaw: f32, pitch: f32) -> Self {
@@ -40,11 +29,10 @@ impl Camera {
             yaw,
             pitch,
             front: Vec3::new(0.0, 0.0, -1.0),
-            movement_speed: SPEED,
             mouse_sensitivity: SENSITIVITY,
             zoom: ZOOM,
-            up: Vec3::new(0.0, 0.0, 0.0),
-            right: Vec3::new(0.0, 0.0, 0.0),
+            up: Vec3::default(),
+            right: Vec3::default(),
             height: position.y,
         };
         camera.update_camera_vectors();
@@ -52,23 +40,10 @@ impl Camera {
         camera
     }
 
-    pub fn get_view_matrix(&self) -> Mat4 {
-        Mat4::look_at(self.position, self.position.add(self.front), self.up)
-    }
+    pub fn get_view_matrix(&self, world_position: Vec3) -> Mat4 {
+        let position = self.position + world_position;
 
-    pub fn process_keyboard(&mut self, direction: CameraMovement, dt: f32) {
-        let velocity = self.movement_speed * dt;
-
-        match direction {
-            CameraMovement::Forward => self.position += self.front * velocity,
-            CameraMovement::Backward => self.position -= self.front * velocity,
-            CameraMovement::Left => self.position -= self.right * velocity,
-            CameraMovement::Right => self.position += self.right * velocity,
-            CameraMovement::Up => self.height += velocity,
-            CameraMovement::Down => self.height -= velocity,
-        }
-
-        self.position.y = self.height; // Keeps camera from flying so that the y position can only be changed with up/down movement keys
+        Mat4::look_at(position, position.add(self.front), self.up)
     }
 
     pub fn process_mouse_movement(&mut self, x_offset: f32, y_offset: f32, constrain_pitch: bool) {

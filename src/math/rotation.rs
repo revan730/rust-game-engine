@@ -1,5 +1,6 @@
 use ultraviolet::Mat4;
 
+#[derive(Default)]
 pub struct Rotation {
     pub angle_x: f32,
     pub angle_y: f32,
