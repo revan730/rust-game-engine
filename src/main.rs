@@ -14,6 +14,7 @@ use crate::graphics::player_character::PlayerCharacter;
 use crate::graphics::scene::Scene;
 use crate::graphics::skybox::Skybox;
 use crate::graphics::static_body_3d::StaticBody3D;
+use crate::math::aabb_bouding_box::AABBBoundingBox;
 use crate::math::rotation::Rotation;
 use crate::opengl::{BlendFactor, Capability, UnpackAlignment};
 use crate::opengl::ClearBitFlags::{ColorBuffer, DepthBuffer};
@@ -152,7 +153,7 @@ fn main() {
 
 fn create_default_scene() -> Scene<'static> {
     let camera: Camera = Camera::from_vec3(Vec3::default(), Vec3::new(0.0, 1.0, 0.0), -62.0, -16.29);
-    let player: PlayerCharacter = PlayerCharacter::new(Node3D { world_position: Vec3::new(-13.65, 5.6, 13.36), rotation: Rotation::default(), scale: Vec3::new(1.0, 1.0, 1.0) }, camera);
+    let player: PlayerCharacter = PlayerCharacter::new(Node3D { world_position: Vec3::new(-13.65, 5.6, 13.36), rotation: Rotation::default(), scale: Vec3::new(1.0, 1.0, 1.0) }, camera, 1.6);
 
     let container_model = Model::load_from_file("res/models/cottage.obj");
     let container_model = Rc::new(container_model);
@@ -166,14 +167,14 @@ fn create_default_scene() -> Scene<'static> {
     for (i, cube_pos) in CUBE_POSITIONS.iter().enumerate() {
         let angle = (20.0f32 * i as f32).to_radians();
         let rotation = Rotation { angle_x: 0.0, angle_y: angle, angle_z: 0.0 };
-        let body = StaticBody3D { node3d: Node3D { world_position: *cube_pos, scale: Vec3::new(0.05, 0.05, 0.05), rotation }, model: container_model.clone() };
+        let body = StaticBody3D { node3d: Node3D { world_position: *cube_pos, scale: Vec3::new(0.05, 0.05, 0.05), rotation }, model: container_model.clone(), bounding_box: AABBBoundingBox::default() };
         static_bodies.push(body);
     }
 
     let shader_program_skybox = Shader::from_files("res/shaders/skybox.vs", "res/shaders/skybox.fs");
 
     let landscape_rotation = Rotation { angle_x: 0.0, angle_y: 0.0, angle_z: 0.0 };
-    static_bodies.push(StaticBody3D { node3d: Node3D { world_position: Vec3::default(), scale: Vec3::new(5.0, 5.0, 5.0), rotation: landscape_rotation }, model: landscape_model.clone() });
+    static_bodies.push(StaticBody3D { node3d: Node3D { world_position: Vec3::default(), scale: Vec3::new(5.0, 5.0, 5.0), rotation: landscape_rotation }, model: landscape_model.clone(), bounding_box: AABBBoundingBox::default() });
 
     let skybox = Skybox::new_from_image_paths(shader_program_skybox, ["res/models/textures/skybox/right.jpg", "res/models/textures/skybox/left.jpg", "res/models/textures/skybox/top.jpg", "res/models/textures/skybox/bottom.jpg", "res/models/textures/skybox/front.jpg", "res/models/textures/skybox/back.jpg"]);
 
@@ -181,14 +182,15 @@ fn create_default_scene() -> Scene<'static> {
 }
 
 fn create_physics_test_scene() -> Scene<'static> {
-    let camera: Camera = Camera::from_vec3(Vec3::new(0.0, 0.0, -2.0), Vec3::new(0.0, 1.0, 0.0), -62.0, -16.29);
-    let player: PlayerCharacter = PlayerCharacter::new(Node3D { world_position: Vec3::new(0.0, 5.0, 0.0), rotation: Rotation::default(), scale: Vec3::new(1.0, 1.0, 1.0) }, camera);
+    let camera: Camera = Camera::from_vec3(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 1.0, 0.0), -62.0, -16.29);
+    let player: PlayerCharacter = PlayerCharacter::new(Node3D { world_position: Vec3::new(0.0, 50.0, 0.0), rotation: Rotation::default(), scale: Vec3::new(1.0, 1.0, 1.0) }, camera, 1.6);
 
-    let container_model = Model::load_from_file("res/models/cottage.obj");
+    let container_model = Model::load_from_file("res/models/container.obj");
     let container_model = Rc::new(container_model);
 
     let mut static_bodies = Vec::<StaticBody3D>::with_capacity(1);
-    static_bodies.push(StaticBody3D { node3d: Node3D { world_position: Vec3::new(0.0, -0.1, 0.0), scale: Vec3::new(1000.00, 0.1, 1000.0), rotation: Rotation::default() }, model: container_model.clone() });
+    let floor_bounding_box = AABBBoundingBox { x_min: -5.0, x_max: 5.0, y_min: -1.0, y_max: 0.0, z_min: -5.0, z_max: 5.0 };
+    static_bodies.push(StaticBody3D { node3d: Node3D { world_position: Vec3::new(0.0, -0.5, 0.0), scale: Vec3::new(5.0, 1.0, 5.0), rotation: Rotation::default() }, model: container_model.clone(), bounding_box: floor_bounding_box });
 
     Scene::new(static_bodies, None, player)
 }

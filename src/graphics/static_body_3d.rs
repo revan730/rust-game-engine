@@ -4,11 +4,13 @@ use ultraviolet::Mat4;
 
 use crate::graphics::model::Model;
 use crate::graphics::node_3d::Node3D;
+use crate::math::aabb_bouding_box::AABBBoundingBox;
 use crate::shader::Shader;
 
 pub struct StaticBody3D {
     pub node3d: Node3D,
     pub model: Rc<Model>, // TODO: Replace with resource manager and get model through it ?
+    pub bounding_box: AABBBoundingBox,
 }
 
 // TODO: Collision shape (model?)
